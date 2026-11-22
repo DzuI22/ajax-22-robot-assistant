@@ -1,0 +1,216 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: #e5e5e5;
+    color: #f8fafc;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ============================================================================
+   CUSTOM SCROLLBAR UNTUK AREA CHAT
+   ============================================================================ */
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.35) transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.3);
+  border-radius: 9999px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.55);
+}
+
+/* ============================================================================
+   SPLINE CANVAS CONTAINER SAFETY
+   Memastikan canvas Spline selalu mengisi parent secara penuh tanpa collapse
+   ============================================================================ */
+.spline-canvas-host > div,
+.spline-canvas-host canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ============================================================================
+   RESPONSIVE LAYOUT — PORTRAIT VS LANDSCAPE (MEDIA QUERY ORIENTATION)
+   - Portrait: Scene Spline mengisi ~62% layar atas saat chat terbuka, chat di bawah.
+   - Mobile/Tablet Landscape: Scene Spline lebih lebar di kiri (~62%), chat jadi
+     panel sempit di kanan agar robot tidak terpotong di layar pendek.
+   - Desktop Landscape (>= 1024px): Scene Spline penuh dengan floating glassmorphism
+     chat box di bagian bawah layar.
+   ============================================================================ */
+
+.stage-layout {
+  position: relative;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.spline-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.chat-overlay-anchor {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 1. ORIENTATION: PORTRAIT (HP / Tablet Vertikal) */
+@media (orientation: portrait) {
+  .stage-layout .spline-stage {
+    width: 100%;
+    height: 100dvh;
+  }
+
+  /* Geser robot ke atas saat chat dibuka di portrait */
+  .stage-layout[data-chat-open='true'] .spline-stage {
+    transform: translateY(-16dvh);
+  }
+
+  .chat-overlay-anchor {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 0.75rem 0.75rem 0.75rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .chat-panel-shell {
+    width: 100%;
+    max-width: 34rem;
+    height: 41dvh;
+    min-height: 240px;
+    max-height: 46dvh;
+  }
+}
+
+/* 2. ORIENTATION: LANDSCAPE pada Mobile / Tablet (< 1024px) */
+@media (orientation: landscape) and (max-width: 1023px) {
+  .stage-layout .spline-stage {
+    width: 100%;
+    height: 100dvh;
+  }
+
+  /* Geser robot ke kiri saat chat dibuka agar tampil utuh di sebelah kiri panel chat */
+  .stage-layout[data-chat-open='true'] .spline-stage {
+    transform: translateX(-19vw);
+  }
+
+  .chat-overlay-anchor {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    padding: 0.625rem 0.625rem 0.625rem 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+  }
+
+  .chat-panel-shell {
+    width: 39vw;
+    min-width: 270px;
+    max-width: 370px;
+    height: calc(100dvh - 1.25rem);
+  }
+}
+
+/* 3. DESKTOP LANDSCAPE (>= 1024px) */
+@media (orientation: landscape) and (min-width: 1024px) {
+  .stage-layout .spline-stage {
+    width: 100%;
+    height: 100dvh;
+  }
+
+  .chat-overlay-anchor {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 1.5rem 1.25rem 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .chat-panel-shell {
+    width: 100%;
+    max-width: 44rem;
+    height: min(370px, 42dvh);
+    min-height: 250px;
+  }
+}
+
+/* Optimasi layar landscape super pendek (mis. HP landscape 360px tinggi) */
+@media (orientation: landscape) and (max-height: 460px) {
+  .hud-header-bar {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+ }
+}
+
+/* ============================================================================
+   ANIMASI SMOOTH BUKA / TUTUP PANEL CHAT
+   - Portrait & Desktop: meluncur halus dari bawah + fade + slight scale
+   - Mobile/Tablet Landscape: meluncur halus dari sisi kanan + fade
+   ============================================================================ */
+.chat-panel-shell {
+  will-change: transform, opacity;
+  transform-origin: bottom center;
+}
+
+.chat-panel-shell[data-open='false'] {
+  opacity: 0;
+  transform: translateY(28px) scale(0.96);
+  visibility: hidden;
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 200ms ease,
+    visibility 0s linear 280ms;
+}
+
+.chat-panel-shell[data-open='true'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  visibility: visible;
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 260ms ease,
+    visibility 0s linear 0s;
+}
+
+@media (orientation: landscape) and (max-width: 1023px) {
+  .chat-panel-shell {
+    transform-origin: right center;
+  }
+
+  .chat-panel-shell[data-open='false'] {
+    transform: translateX(36px) scale(0.97);
+  }
+}
