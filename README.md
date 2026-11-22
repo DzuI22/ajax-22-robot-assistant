@@ -1,4 +1,4 @@
-# AURA-01 — AI Robot Assistant (3D Spline + Next.js + Vikey.ai)
+# AJA𝕏-22 — AI Robot Assistant (3D Spline + Next.js + Vikey.ai)
 
 Website interaktif full-stack bertema **AI Robot Assistant** dengan visual 3D HD dari **Spline**, UI chat futuristik bergaya *dark glassmorphism*, backend aman di Next.js App Router yang terintegrasi dengan **Vikey.ai**, serta responsif penuh untuk **Mobile Portrait, Mobile Landscape, dan Desktop**.
 
